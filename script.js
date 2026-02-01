@@ -21,30 +21,41 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to move the no button to a random position
     function moveNoButton() {
-        const buttonWidth = noBtn.offsetWidth;
-        const buttonHeight = noBtn.offsetHeight;
-        const margin = 50; // Keep 50px margin from edges
+        // Get the container element to position within
+        const container = document.querySelector('.container');
+        const containerRect = container.getBoundingClientRect();
         
-        const maxX = window.innerWidth - buttonWidth - margin;
-        const maxY = window.innerHeight - buttonHeight - margin;
-        const minX = margin;
-        const minY = margin;
+        // Get button dimensions with fallbacks
+        const buttonWidth = noBtn.offsetWidth || 120;
+        const buttonHeight = noBtn.offsetHeight || 50;
+        const margin = 20; // Keep 20px margin from container edges
         
-        // Ensure we have valid bounds
-        const validMaxX = Math.max(minX, maxX);
-        const validMaxY = Math.max(minY, maxY);
+        // Calculate available space within container
+        const availableWidth = containerRect.width - buttonWidth - (margin * 2);
+        const availableHeight = containerRect.height - buttonHeight - (margin * 2);
         
-        const randomX = Math.random() * (validMaxX - minX) + minX;
-        const randomY = Math.random() * (validMaxY - minY) + minY;
+        // Ensure we have valid bounds (minimum 100px available space)
+        const validWidth = Math.max(100, availableWidth);
+        const validHeight = Math.max(100, availableHeight);
         
-        noBtn.style.position = 'fixed';
+        // Calculate random position within container bounds
+        const randomX = Math.random() * validWidth + margin;
+        const randomY = Math.random() * validHeight + margin;
+        
+        console.log(`Moving button within container to: X=${randomX.toFixed(2)}, Y=${randomY.toFixed(2)}, Container: ${containerRect.width}x${containerRect.height}`);
+        
+        // Position relative to the container instead of fixed to viewport
+        noBtn.style.position = 'absolute';
         noBtn.style.left = randomX + 'px';
         noBtn.style.top = randomY + 'px';
         noBtn.style.zIndex = '1000';
         
-        // Ensure button is fully visible
+        // Ensure button is fully visible and not hidden
         noBtn.style.transform = 'translate(0, 0)';
         noBtn.style.opacity = '1';
+        noBtn.style.visibility = 'visible';
+        noBtn.style.display = 'inline-block';
+        noBtn.style.pointerEvents = 'auto';
         
         // Change button text to funny message
         noBtn.textContent = funnyMessages[messageIndex];
@@ -85,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.animation = 'gradientShift 2s ease infinite';
     });
     
-    // Function to create floating hearts
+    // Function to create floating cartoon characters
     function createFloatingHearts() {
         const heartsContainer = document.createElement('div');
         heartsContainer.style.position = 'fixed';
@@ -97,23 +108,24 @@ document.addEventListener('DOMContentLoaded', function() {
         heartsContainer.style.zIndex = '999';
         document.body.appendChild(heartsContainer);
         
-        const heartSymbols = ['❤️', '💕', '💖', '💗', '💝', '💘', '💓', '🌹'];
+        const cartoonSymbols = ['🐰', '🌸', '⭐', '🦄', '🌈', '🎈', '🦋', '🌺', '�', '✨', '�', '🌟'];
         
         for (let i = 0; i < 50; i++) {
             setTimeout(() => {
-                const heart = document.createElement('div');
-                heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-                heart.style.position = 'absolute';
-                heart.style.left = Math.random() * 100 + '%';
-                heart.style.bottom = '-50px';
-                heart.style.fontSize = (Math.random() * 2 + 1) + 'rem';
-                heart.style.animation = `floatUp ${Math.random() * 3 + 2}s ease-in-out`;
-                heart.style.opacity = '0.8';
-                heartsContainer.appendChild(heart);
+                const symbol = document.createElement('div');
+                symbol.textContent = cartoonSymbols[Math.floor(Math.random() * cartoonSymbols.length)];
+                symbol.style.position = 'absolute';
+                symbol.style.left = Math.random() * 100 + '%';
+                symbol.style.bottom = '-50px';
+                symbol.style.fontSize = (Math.random() * 2.5 + 1) + 'rem';
+                symbol.style.animation = `floatUp ${Math.random() * 3 + 2}s ease-in-out`;
+                symbol.style.opacity = '0.9';
+                symbol.style.filter = 'drop-shadow(2px 2px 4px rgba(139, 92, 246, 0.3))';
+                heartsContainer.appendChild(symbol);
                 
-                // Remove heart after animation
+                // Remove symbol after animation
                 setTimeout(() => {
-                    heart.remove();
+                    symbol.remove();
                 }, 5000);
             }, i * 100);
         }
@@ -177,18 +189,93 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.head.appendChild(sparkleStyle);
     
-    // Add a subtle parallax effect to background hearts
+    // Add interactive cartoon character effects
+    const characters = document.querySelectorAll('.character');
+    characters.forEach((character, index) => {
+        character.style.cursor = 'pointer';
+        character.style.pointerEvents = 'auto';
+        
+        character.addEventListener('click', function() {
+            // Create a burst of smaller characters
+            createCharacterBurst(character);
+            
+            // Make the character jump and spin
+            character.style.animation = 'none';
+            setTimeout(() => {
+                character.style.animation = 'characterJump 0.8s ease-out';
+            }, 10);
+            
+            // Change to a random character temporarily
+            const originalChar = character.textContent;
+            const randomChars = ['🎉', '💜', '⭐', '🦄', '🌈'];
+            character.textContent = randomChars[Math.floor(Math.random() * randomChars.length)];
+            
+            setTimeout(() => {
+                character.textContent = originalChar;
+                character.style.animation = `cartoonFloat 8s ease-in-out infinite`;
+                character.style.animationDelay = `${index * 0.5}s`;
+            }, 800);
+        });
+    });
+    
+    // Function to create character burst effect
+    function createCharacterBurst(element) {
+        const rect = element.getBoundingClientRect();
+        const burstSymbols = ['✨', '💜', '⭐', '🌟'];
+        
+        for (let i = 0; i < 8; i++) {
+            const burst = document.createElement('div');
+            burst.textContent = burstSymbols[Math.floor(Math.random() * burstSymbols.length)];
+            burst.style.position = 'fixed';
+            burst.style.left = rect.left + rect.width / 2 + 'px';
+            burst.style.top = rect.top + rect.height / 2 + 'px';
+            burst.style.fontSize = '1.5rem';
+            burst.style.pointerEvents = 'none';
+            burst.style.zIndex = '1002';
+            burst.style.animation = `burstOut 1s ease-out forwards`;
+            burst.style.transform = `rotate(${i * 45}deg)`;
+            document.body.appendChild(burst);
+            
+            setTimeout(() => {
+                burst.remove();
+            }, 1000);
+        }
+    }
+    
+    // Add burst animation
+    const burstStyle = document.createElement('style');
+    burstStyle.textContent = `
+        @keyframes characterJump {
+            0% { transform: translateY(0) scale(1) rotate(0deg); }
+            50% { transform: translateY(-50px) scale(1.5) rotate(180deg); }
+            100% { transform: translateY(0) scale(1) rotate(360deg); }
+        }
+        
+        @keyframes burstOut {
+            0% {
+                transform: translate(0, 0) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx, 100px), var(--ty, -100px)) scale(1.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(burstStyle);
+    
+    // Add a subtle parallax effect to background cartoon characters
     document.addEventListener('mousemove', function(e) {
-        const hearts = document.querySelectorAll('.heart');
+        const characters = document.querySelectorAll('.character');
         const x = e.clientX / window.innerWidth;
         const y = e.clientY / window.innerHeight;
         
-        hearts.forEach((heart, index) => {
-            const speed = (index + 1) * 0.5;
+        characters.forEach((character, index) => {
+            const speed = (index + 1) * 0.8;
             const xOffset = (x - 0.5) * speed;
             const yOffset = (y - 0.5) * speed;
             
-            heart.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+            character.style.transform = `translate(${xOffset}px, ${yOffset}px) rotate(${xOffset * 2}deg)`;
         });
     });
 });
